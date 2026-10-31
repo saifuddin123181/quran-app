@@ -1,18 +1,28 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
-// Reader accounts. Change these usernames and passwords before publishing (this file is public
-// on GitHub). To add another reader, add another line.
-export const READER_USERS = [
-  { username: "Saif", password: "Saif123" },
-  { username: "Bushra", password: "Bushra@721641" },
-];
+// Passwords never live in the code (the repository is public). They come from environment
+// variables: Vercel project settings in production, .env.local (not committed) on your computer.
+// See .env.example. A missing setting turns that login off rather than falling back to anything.
 
-// Hard-coded admin account for /admin (uploading recitations). Set ADMIN_PASSWORD in the
-// environment (e.g. on Vercel) to override the default password without changing code.
+// READER_ACCOUNTS="Saif:password1,Bushra:password2" (username:password pairs, comma-separated;
+// a password can't contain a comma).
+function parseAccounts(value: string | undefined) {
+  return (value ?? "")
+    .split(",")
+    .map((entry) => {
+      const colon = entry.indexOf(":");
+      return { username: entry.slice(0, colon).trim(), password: entry.slice(colon + 1) };
+    })
+    .filter((account) => account.username && account.password);
+}
+
+export const READER_USERS = parseAccounts(process.env.READER_ACCOUNTS);
+
+// Admin account for /admin (uploading recitations). Signs in with the username or the ID.
 export const ADMIN_USER = {
   id: "admin-01",
   username: "admin",
-  password: process.env.ADMIN_PASSWORD ?? "Admin@123",
+  password: process.env.ADMIN_PASSWORD ?? "",
 };
 
 export const SESSION_COOKIE = "session";
@@ -26,7 +36,11 @@ export const SESSION_MAX_AGE = 60 * 60 * 24; // 1 day, in seconds
 // Admin tokens are signed for "admin:<id>", so a reader's token can never pass as an admin's.
 export const ADMIN_TOKEN_SUBJECT = `admin:${ADMIN_USER.id}`;
 
-const SECRET = process.env.SESSION_SECRET ?? "dev-only-secret-change-me";
+// Signs session cookies. In production a missing SESSION_SECRET gets a random per-process value,
+// so sign-in simply doesn't work until it's set, instead of using a guessable secret.
+const SECRET =
+  process.env.SESSION_SECRET ??
+  (process.env.NODE_ENV === "production" ? randomBytes(32).toString("hex") : "dev-only-secret-change-me");
 
 function sign(value: string) {
   return createHmac("sha256", SECRET).update(value).digest("base64url");

@@ -28,7 +28,8 @@ export function isAdminLogin(username: string, password: string) {
   const byUsername = safeEqual(username, ADMIN_USER.username);
   const byId = safeEqual(username, ADMIN_USER.id);
   const passOk = safeEqual(password, ADMIN_USER.password);
-  return (byUsername || byId) && passOk;
+  // No ADMIN_PASSWORD configured means no admin sign-in (never an empty password).
+  return ADMIN_USER.password !== "" && (byUsername || byId) && passOk;
 }
 
 export async function startAdminSession() {

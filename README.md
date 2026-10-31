@@ -35,12 +35,13 @@ npm run dev
 
 Open http://localhost:3000. You'll be redirected to `/login`.
 
-Demo credentials (hard-coded in `lib/session.ts`):
+Accounts and passwords aren't in the code. Copy `.env.example` to `.env.local` and fill in:
 
-- Username: `user`
-- Password: `pass`
+- `READER_ACCOUNTS`: reader logins as `username:password` pairs, comma-separated.
+- `ADMIN_PASSWORD`: password for the admin (username `admin` or ID `admin-01`).
+- `SESSION_SECRET`: a long random string that signs login cookies.
 
-Set `SESSION_SECRET` in production to sign session cookies with your own secret.
+A missing setting turns that login off. On Vercel, set the same variables in the project settings.
 
 ### Mushaf pages
 
@@ -58,8 +59,8 @@ The app remembers the last page and how far into its recording the reader got, i
 browser's local storage (`lib/resume.ts`). After a refresh, closing the tab or signing out,
 the home screen shows a "Continue reading" card, and the player resumes from the same second.
 
-Recordings are managed in the admin area at `/admin` (its own login: see `ADMIN_USER` in
-`lib/session.ts`; set `ADMIN_PASSWORD` in the environment to override the password). Upload an
+Recordings are managed in the admin area at `/admin` (sign in as `admin` with
+`ADMIN_PASSWORD`, at `/admin/login` or the normal sign-in page). Upload an
 MP3 or M4A for a page, or choose several files named by page number (`007.mp3`, `008.mp3`, ...)
 to upload them together. Replace or delete a page's recording from the list.
 
@@ -79,9 +80,10 @@ Its free Hobby allowance (1 GB storage, 10 GB transfer per month) covers this ap
 1. Push the repository to GitHub and import it in Vercel.
 2. In the Vercel project: **Storage > Create > Blob**, and connect the store to the project.
    This sets `BLOB_READ_WRITE_TOKEN` for you.
-3. In **Settings > Environment Variables**, add:
-   - `SESSION_SECRET`: a long random string (signs login cookies).
+3. In **Settings > Environment Variables**, add (see `.env.example`):
+   - `READER_ACCOUNTS`: reader logins, e.g. `Saif:password1,Bushra:password2`.
    - `ADMIN_PASSWORD`: your admin password.
+   - `SESSION_SECRET`: a long random string (signs login cookies).
 4. Copy the page images and existing recordings into Blob (once, from your computer):
 
    ```bash
@@ -121,7 +123,7 @@ quran-app/
 │   ├── audio-store.ts   # recitation storage: list, save, delete (local or Blob)
 │   ├── audio-files.ts   # upload rules: allowed types, size limit, file naming
 │   ├── admin-auth.ts    # server-side admin session check
-│   └── session.ts       # reader/admin credentials and signed session cookies
+│   └── session.ts       # reader/admin accounts (from env) and signed session cookies
 ├── public/mushaf/       # page scans 001.jpg-611.jpg
 ├── public/audio/        # recitations in local development, NNN.mp3 per page
 ├── scripts/
