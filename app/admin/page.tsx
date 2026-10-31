@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { AdminAudio } from "@/components/admin-audio";
+import { SignedInAs } from "@/components/signed-in-as";
 import { isAdmin } from "@/lib/admin-auth";
 import { audioStorage, getAudioPages } from "@/lib/audio-store";
 import { adminLogout } from "./actions";
@@ -16,7 +17,10 @@ export default function AdminPage() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-xl flex-col px-4 pt-[env(safe-area-inset-top)] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <header className="flex h-14 items-center justify-between">
-        <h1 className="text-xl font-semibold">Recitations</h1>
+        <div className="min-w-0">
+          <h1 className="text-xl leading-tight font-semibold">Recitations</h1>
+          <SignedInAs />
+        </div>
         <div className="flex items-center gap-1">
           <Link href="/" className="h-10 rounded-lg px-3 text-sm leading-10 text-black/70 active:bg-black/10 dark:text-white/70">
             Reader

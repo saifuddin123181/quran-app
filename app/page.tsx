@@ -4,13 +4,17 @@ import { AdminLink } from "@/components/admin-link";
 import { ContinueReading } from "@/components/continue-reading";
 import { GoToPage } from "@/components/go-to-page";
 import { HomeTabs } from "@/components/home-tabs";
+import { SignedInAs } from "@/components/signed-in-as";
 import { JUZ_NAMES, JUZ_START_PAGES, SURAHS, TOTAL_PAGES } from "@/lib/quran-data";
 
 export default function Home() {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between bg-background px-4 pt-[env(safe-area-inset-top)]">
-        <h1 className="text-xl font-semibold">Quran</h1>
+        <div className="min-w-0">
+          <h1 className="text-xl leading-tight font-semibold">Quran</h1>
+          <SignedInAs />
+        </div>
         <div className="flex items-center gap-1">
           <AdminLink />
           <form action={logout}>

@@ -3,17 +3,14 @@
 // "reader" cookie set at sign-in), so it survives closing the tab, refreshing and signing out,
 // and readers sharing a device never see each other's bookmark. Storage can be unavailable
 // (private mode, blocked site data), so every access is guarded and the app works without it.
+import { currentReader } from "./reader-cookie";
+
 export type ResumePoint = { page: number; time: number };
 
 const KEY_PREFIX = "quran-app:resume:v2:";
 // Before bookmarks were kept per reader, one was shared by everyone on the device.
 const SHARED_KEY = "quran-app:resume:v1";
 const listeners = new Set<() => void>();
-
-function currentReader() {
-  const match = /(?:^|;\s*)reader=([^;]*)/.exec(document.cookie);
-  return match ? decodeURIComponent(match[1]) : null;
-}
 
 function storageKey() {
   const reader = currentReader();
