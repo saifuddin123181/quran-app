@@ -1,0 +1,4 @@
+# Served from Vercel Blob in production (see README > Deploying on Vercel), and too large for the
+# Hobby plan's deployment limit, so they're left out of what Vercel deploys.
+public/mushaf
+public/audio

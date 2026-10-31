@@ -2,16 +2,20 @@
 // into Vercel Blob storage, for deploying on Vercel. Safe to re-run: files already in the store
 // are skipped.
 //
-//   npx vercel env pull .env.local          # gets BLOB_READ_WRITE_TOKEN from your Vercel project
-//   node --env-file=.env.local scripts/upload-to-blob.mjs
+//   npx vercel link
+//   npx vercel env pull .env.vercel --environment=production
+//   node --env-file=.env.vercel scripts/upload-to-blob.mjs
 //
 // It prints the NEXT_PUBLIC_MUSHAF_BASE_URL value to set in the Vercel project's settings.
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { list, put } from "@vercel/blob";
 
-if (!process.env.BLOB_READ_WRITE_TOKEN) {
-  console.error("BLOB_READ_WRITE_TOKEN is not set. Run: npx vercel env pull .env.local");
+// Vercel won't download secret values, so a pulled BLOB_READ_WRITE_TOKEN is just a placeholder.
+// The Blob SDK can authenticate with the pulled VERCEL_OIDC_TOKEN and BLOB_STORE_ID instead.
+if (process.env.BLOB_READ_WRITE_TOKEN === "[SENSITIVE]") delete process.env.BLOB_READ_WRITE_TOKEN;
+if (!process.env.BLOB_READ_WRITE_TOKEN && !(process.env.VERCEL_OIDC_TOKEN && process.env.BLOB_STORE_ID)) {
+  console.error("No Blob credentials. Run: npx vercel env pull .env.vercel --environment=production");
   process.exit(1);
 }
 
