@@ -1,10 +1,11 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-// Hard-coded demo credentials. Replace with a real user store before production.
-export const DEMO_USER = {
-  username: "Saif",
-  password: "Saif123",
-};
+// Reader accounts. Change these usernames and passwords before publishing (this file is public
+// on GitHub). To add another reader, add another line.
+export const READER_USERS = [
+  { username: "Saif", password: "Saif123" },
+  { username: "Bushra", password: "Bushra@721641" },
+];
 
 // Hard-coded admin account for /admin (uploading recitations). Set ADMIN_PASSWORD in the
 // environment (e.g. on Vercel) to override the default password without changing code.
@@ -16,6 +17,10 @@ export const ADMIN_USER = {
 
 export const SESSION_COOKIE = "session";
 export const ADMIN_SESSION_COOKIE = "admin_session";
+// Who is signed in, readable by the page so each reader's "continue reading" bookmark is kept
+// separately in the browser (lib/resume.ts). Not used for access control: that's the signed,
+// httpOnly session cookies above.
+export const READER_NAME_COOKIE = "reader";
 export const SESSION_MAX_AGE = 60 * 60 * 24; // 1 day, in seconds
 
 // Admin tokens are signed for "admin:<id>", so a reader's token can never pass as an admin's.

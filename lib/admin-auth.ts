@@ -4,6 +4,7 @@ import {
   ADMIN_SESSION_COOKIE,
   ADMIN_TOKEN_SUBJECT,
   ADMIN_USER,
+  READER_NAME_COOKIE,
   SESSION_MAX_AGE,
   createSessionToken,
   safeEqual,
@@ -31,8 +32,16 @@ export function isAdminLogin(username: string, password: string) {
 }
 
 export async function startAdminSession() {
-  (await cookies()).set(ADMIN_SESSION_COOKIE, createSessionToken(ADMIN_TOKEN_SUBJECT), {
+  const cookieStore = await cookies();
+  cookieStore.set(ADMIN_SESSION_COOKIE, createSessionToken(ADMIN_TOKEN_SUBJECT), {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_MAX_AGE,
+  });
+  // The admin gets their own "continue reading" bookmark too (see READER_NAME_COOKIE).
+  cookieStore.set(READER_NAME_COOKIE, ADMIN_TOKEN_SUBJECT, {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",

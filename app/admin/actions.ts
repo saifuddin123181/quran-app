@@ -6,7 +6,7 @@ import { updateTag } from "next/cache";
 import { isAdminLogin, requireAdmin, startAdminSession } from "@/lib/admin-auth";
 import { AUDIO_TAG, deleteAudio } from "@/lib/audio-store";
 import { TOTAL_PAGES } from "@/lib/quran-data";
-import { ADMIN_SESSION_COOKIE } from "@/lib/session";
+import { ADMIN_SESSION_COOKIE, ADMIN_TOKEN_SUBJECT, READER_NAME_COOKIE } from "@/lib/session";
 import type { LoginState } from "@/app/actions";
 
 export async function adminLogin(_prevState: LoginState, formData: FormData): Promise<LoginState> {
@@ -21,7 +21,9 @@ export async function adminLogin(_prevState: LoginState, formData: FormData): Pr
 }
 
 export async function adminLogout() {
-  (await cookies()).delete(ADMIN_SESSION_COOKIE);
+  const cookieStore = await cookies();
+  cookieStore.delete(ADMIN_SESSION_COOKIE);
+  if (cookieStore.get(READER_NAME_COOKIE)?.value === ADMIN_TOKEN_SUBJECT) cookieStore.delete(READER_NAME_COOKIE);
   redirect("/admin/login");
 }
 

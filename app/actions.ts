@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { isAdminLogin, startAdminSession } from "@/lib/admin-auth";
 import {
-  DEMO_USER,
+  READER_NAME_COOKIE,
+  READER_USERS,
   SESSION_COOKIE,
   SESSION_MAX_AGE,
   createSessionToken,
@@ -20,9 +21,13 @@ export async function login(
   const username = String(formData.get("username") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
-  // Evaluate every check so a wrong username takes as long as a wrong password.
-  const userOk = safeEqual(username, DEMO_USER.username);
-  const passOk = safeEqual(password, DEMO_USER.password);
+  // Check every account, evaluating both comparisons for each, so a wrong username takes as
+  // long as a wrong password.
+  const reader = READER_USERS.map((u) => {
+    const userOk = safeEqual(username, u.username);
+    const passOk = safeEqual(password, u.password);
+    return userOk && passOk;
+  }).some(Boolean);
   const admin = isAdminLogin(username, password);
 
   // The admin can sign in here too; they go to the admin area.
@@ -30,12 +35,20 @@ export async function login(
     await startAdminSession();
     redirect("/admin");
   }
-  if (!userOk || !passOk) {
+  if (!reader) {
     return { error: "Invalid username or password." };
   }
 
-  (await cookies()).set(SESSION_COOKIE, createSessionToken(username), {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, createSessionToken(username), {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_MAX_AGE,
+  });
+  // Lets the page keep this reader's bookmark apart from other readers on the same device.
+  cookieStore.set(READER_NAME_COOKIE, username, {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
@@ -46,6 +59,8 @@ export async function login(
 }
 
 export async function logout() {
-  (await cookies()).delete(SESSION_COOKIE);
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete(READER_NAME_COOKIE);
   redirect("/login");
 }

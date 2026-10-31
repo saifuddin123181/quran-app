@@ -1,15 +1,31 @@
 // Where the reader left off: the last page shown and how far into its recitation they got.
-// Kept in this browser's localStorage, so it survives closing the tab, refreshing and signing
-// out on the same device. Storage can be unavailable (private mode, blocked site data), so every
-// access is guarded and the app works without it.
+// Kept in this browser's localStorage, separately for each signed-in reader (named by the
+// "reader" cookie set at sign-in), so it survives closing the tab, refreshing and signing out,
+// and readers sharing a device never see each other's bookmark. Storage can be unavailable
+// (private mode, blocked site data), so every access is guarded and the app works without it.
 export type ResumePoint = { page: number; time: number };
 
-const KEY = "quran-app:resume:v1";
+const KEY_PREFIX = "quran-app:resume:v2:";
+// Before bookmarks were kept per reader, one was shared by everyone on the device.
+const SHARED_KEY = "quran-app:resume:v1";
 const listeners = new Set<() => void>();
 
+function currentReader() {
+  const match = /(?:^|;\s*)reader=([^;]*)/.exec(document.cookie);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function storageKey() {
+  const reader = currentReader();
+  return reader ? KEY_PREFIX + reader : null;
+}
+
 export function readResumeRaw(): string | null {
+  const key = storageKey();
+  if (!key) return null;
   try {
-    return localStorage.getItem(KEY);
+    localStorage.removeItem(SHARED_KEY);
+    return localStorage.getItem(key);
   } catch {
     return null;
   }
@@ -30,8 +46,10 @@ export function readResume() {
 }
 
 export function saveResume(point: ResumePoint) {
+  const key = storageKey();
+  if (!key) return;
   try {
-    localStorage.setItem(KEY, JSON.stringify({ page: point.page, time: Math.round(point.time * 10) / 10 }));
+    localStorage.setItem(key, JSON.stringify({ page: point.page, time: Math.round(point.time * 10) / 10 }));
   } catch {
     return;
   }
@@ -41,7 +59,7 @@ export function saveResume(point: ResumePoint) {
 // For useSyncExternalStore: changes from this tab and from other tabs.
 export function subscribeResume(onChange: () => void) {
   listeners.add(onChange);
-  const onStorage = (e: StorageEvent) => e.key === KEY && onChange();
+  const onStorage = (e: StorageEvent) => e.key?.startsWith(KEY_PREFIX) && onChange();
   window.addEventListener("storage", onStorage);
   return () => {
     listeners.delete(onChange);
