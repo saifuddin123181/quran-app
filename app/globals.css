@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Reader: white around the white page scans, even in dark mode. */
+:root {
+  --reader-accent: #1d5fa8;
+}
+
+.mushaf-reader {
+  color-scheme: light;
+  background: #ffffff;
+  color: #111111;
+}
+
+/* A newly shown page slides in from the side the reader turned towards. */
+@keyframes page-enter-from-left {
+  from {
+    transform: translateX(-35%);
+    opacity: 0;
+  }
+}
+
+@keyframes page-enter-from-right {
+  from {
+    transform: translateX(35%);
+    opacity: 0;
+  }
+}
+
+.page-enter-from-left {
+  animation: page-enter-from-left 200ms ease-out;
+}
+
+.page-enter-from-right {
+  animation: page-enter-from-right 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-from-left,
+  .page-enter-from-right {
+    animation: none;
+  }
+}
