@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { logout } from "@/app/actions";
+import { AdminLink } from "@/components/admin-link";
 import { ContinueReading } from "@/components/continue-reading";
 import { GoToPage } from "@/components/go-to-page";
 import { HomeTabs } from "@/components/home-tabs";
@@ -10,14 +11,17 @@ export default function Home() {
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between bg-background px-4 pt-[env(safe-area-inset-top)]">
         <h1 className="text-xl font-semibold">Quran</h1>
-        <form action={logout}>
-          <button
-            type="submit"
-            className="h-10 rounded-lg px-3 text-sm text-black/70 active:bg-black/10 dark:text-white/70 dark:active:bg-white/15"
-          >
-            Sign out
-          </button>
-        </form>
+        <div className="flex items-center gap-1">
+          <AdminLink />
+          <form action={logout}>
+            <button
+              type="submit"
+              className="h-10 rounded-lg px-3 text-sm text-black/70 active:bg-black/10 dark:text-white/70 dark:active:bg-white/15"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
       </header>
 
       <div className="flex flex-col gap-3 px-4 pt-1 pb-4">

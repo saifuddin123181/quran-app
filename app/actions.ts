@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { isAdminLogin, startAdminSession } from "@/lib/admin-auth";
 import {
+  ADMIN_SESSION_COOKIE,
   READER_NAME_COOKIE,
   READER_USERS,
   SESSION_COOKIE,
@@ -58,9 +59,12 @@ export async function login(
   redirect("/");
 }
 
+// Signs out completely on this device, including an admin session; otherwise an admin who opened
+// the reader would be sent straight back from the sign-in page.
 export async function logout() {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete(ADMIN_SESSION_COOKIE);
   cookieStore.delete(READER_NAME_COOKIE);
   redirect("/login");
 }
